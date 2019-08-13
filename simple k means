@@ -1,0 +1,178 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Aug 13 07:49:48 2019
+
+@author: Ahmad Husain
+"""
+
+import pandas as pd
+import numpy as np
+
+#import data
+d=pd.read_excel('data setelah cleaning.xlsx')
+
+#take variabel product, price and feedback
+product=d['Name of product']
+price=d['Price_of_product']
+feedback=d['feedback_owner']
+location=d['Location_sale']
+
+#groupby location
+loc_owner = d.groupby('Location_sale').size()
+loc_owner1=pd.DataFrame(loc_owner)
+ 
+loc_owner1.to_excel('group by location.xlsx')
+
+#convert type data string to integer 
+price1=price.str.replace(r'.','')
+price= price1.astype(int)
+d['Price_of_product']=price
+
+#plot price vs feedback
+import matplotlib.pyplot as plt
+plt.plot(price, feedback, 'ro', label='d')
+plt.plot(feedback,price ,'ro', label='d')
+
+max(feedback)
+max(price)
+
+# Initialize the centroids
+#centroid feedback vs price
+c1 = (100,10000000)
+c2 = (9000,500000)
+c3 = (19000,100000)
+c4 = (25000,900000)
+
+# points and the centroids
+
+def calculate_distance(centroid, X, Y):
+    distances = []
+        
+    # Unpack the x and y coordinates of the centroid
+    c_x, c_y = centroid
+        
+    # Iterate over the data points and calculate the distance using the           # given formula
+    for x, y in list(zip(X, Y)):
+        root_diff_x = (x - c_x) ** 2
+        root_diff_y = (y - c_y) ** 2
+        distance = np.sqrt(root_diff_x + root_diff_y)
+        distances.append(distance)
+        
+    return distances
+
+#calculate distance from 4 centroid
+d['c1_distance'] = calculate_distance(c1, feedback, price)
+d['c2_distance'] = calculate_distance(c2, feedback, price)
+d['c3_distance'] = calculate_distance(c3, feedback, price)
+d['c4_distance'] = calculate_distance(c4, feedback, price)
+
+d['Cluster'] = d[['c1_distance', 'c2_distance', 'c3_distance','c4_distance']].apply(np.argmin, axis =1)
+
+#save first k means
+d.to_excel('data k means pertama.xlsx')
+
+# Calculate the coordinates of the new centroid from cluster 1
+feedback_new_centroid1 = d[d['Cluster']=='c1_distance']['feedback_owner'].mean()
+price_new_centroid1 = d[d['Cluster']=='c1_distance']['Price_of_product'].mean()
+
+# Calculate the coordinates of the new centroid from cluster 2
+feedback_new_centroid2 =  d[d['Cluster']=='c2_distance']['feedback_owner'].mean()
+price_new_centroid2 =  d[d['Cluster']=='c2_distance']['Price_of_product'].mean()
+
+# Calculate the coordinates of the new centroid from cluster 3
+feedback_new_centroid3 =  d[d['Cluster']=='c3_distance']['feedback_owner'].mean()
+price_new_centroid3 =  d[d['Cluster']=='c3_distance']['Price_of_product'].mean()
+
+feedback_new_centroid4 =  d[d['Cluster']=='c4_distance']['feedback_owner'].mean()
+price_new_centroid4 =  d[d['Cluster']=='c4_distance']['Price_of_product'].mean()
+
+c1_kedua = (feedback_new_centroid1,price_new_centroid1)
+c2_kedua = (feedback_new_centroid2,price_new_centroid2)
+c3_kedua = (feedback_new_centroid3,price_new_centroid3)
+c4_kedua = (feedback_new_centroid4,price_new_centroid4)
+
+cent_gbg=(c1_kedua,c2_kedua,c3_kedua,c4_kedua)
+cent_gbg=pd.DataFrame(list(cent_gbg))
+
+
+#plot
+plt.scatter(feedback, price)   
+plt.scatter(cent_gbg[0], cent_gbg[1], c='red', marker='x')
+
+#iterasi kedua
+#calculate distance from 4 centroid
+d['c1_distance_it2'] = calculate_distance(c1_kedua, feedback, price)
+d['c2_distance_it2'] = calculate_distance(c2_kedua, feedback, price)
+d['c3_distance_it2'] = calculate_distance(c3_kedua, feedback, price)
+d['c4_distance_it2'] = calculate_distance(c4_kedua, feedback, price)
+
+d['Cluster_kedua'] = d[['c1_distance_it2', 'c2_distance_it2', 'c3_distance_it2','c4_distance_it2']].apply(np.argmin, axis =1)
+#save second k means
+d.to_excel('data k means kedua.xlsx')
+
+# Calculate the coordinates of the new centroid from cluster 1
+feedback_new_centroid1_2 = d[d['Cluster_kedua']=='c1_distance_it2']['feedback_owner'].mean()
+price_new_centroid1_2 = d[d['Cluster_kedua']=='c1_distance_it2']['Price_of_product'].mean()
+
+# Calculate the coordinates of the new centroid from cluster 2
+feedback_new_centroid2_2 = d[d['Cluster_kedua']=='c1_distance_it2']['feedback_owner'].mean()
+price_new_centroid2_2 =  d[d['Cluster_kedua']=='c2_distance_it2']['Price_of_product'].mean()
+
+# Calculate the coordinates of the new centroid from cluster 3
+feedback_new_centroid3_2 =  d[d['Cluster_kedua']=='c3_distance_it2']['feedback_owner'].mean()
+price_new_centroid3_2 =  d[d['Cluster_kedua']=='c3_distance_it2']['Price_of_product'].mean()
+
+feedback_new_centroid4_2 =  d[d['Cluster_kedua']=='c4_distance_it2']['feedback_owner'].mean()
+price_new_centroid4_2 =  d[d['Cluster_kedua']=='c4_distance_it2']['Price_of_product'].mean()
+
+c1_ketiga = (feedback_new_centroid1_2,price_new_centroid1_2)
+c2_ketiga = (feedback_new_centroid2_2,price_new_centroid2_2)
+c3_ketiga = (feedback_new_centroid3_2,price_new_centroid3_2)
+c4_ketiga = (feedback_new_centroid4_2,price_new_centroid4_2)
+
+cent_gbg2=(c1_ketiga,c2_ketiga,c3_ketiga,c3_ketiga,c4_ketiga)
+cent_gbg2=pd.DataFrame(list(cent_gbg2))
+
+#plot
+plt.scatter(feedback, price)   
+plt.scatter(cent_gbg2[0], cent_gbg2[1], c='red', marker='x')
+
+
+#iterasi ketiga
+#calculate distance from 4 centroid
+d['c1_distance_it3'] = calculate_distance(c1_ketiga, feedback, price)
+d['c2_distance_it3'] = calculate_distance(c2_ketiga, feedback, price)
+d['c3_distance_it3'] = calculate_distance(c3_ketiga, feedback, price)
+d['c4_distance_it3'] = calculate_distance(c4_ketiga, feedback, price)
+
+d['Cluster_ketiga'] = d[['c1_distance_it3', 'c2_distance_it3', 'c3_distance_it3','c4_distance_it3']].apply(np.argmin, axis =1)
+#save second k means
+d.to_excel('data k means ketiga.xlsx')
+
+# Calculate the coordinates of the new centroid from cluster 2
+feedback_new_centroid1_3 = d[d['Cluster_ketiga']=='c1_distance_it3']['feedback_owner'].mean()
+price_new_centroid1_3 = d[d['Cluster_ketiga']=='c1_distance_it3']['Price_of_product'].mean()
+
+# Calculate the coordinates of the new centroid from cluster 2
+feedback_new_centroid2_3 = d[d['Cluster_ketiga']=='c1_distance_it3']['feedback_owner'].mean()
+price_new_centroid2_3 =  d[d['Cluster_ketiga']=='c2_distance_it3']['Price_of_product'].mean()
+
+# Calculate the coordinates of the new centroid from cluster 3
+feedback_new_centroid3_3 =  d[d['Cluster_ketiga']=='c3_distance_it3']['feedback_owner'].mean()
+price_new_centroid3_3 =  d[d['Cluster_ketiga']=='c3_distance_it3']['Price_of_product'].mean()
+
+feedback_new_centroid4_3 =  d[d['Cluster_ketiga']=='c4_distance_it3']['feedback_owner'].mean()
+price_new_centroid4_3 =  d[d['Cluster_ketiga']=='c4_distance_it3']['Price_of_product'].mean()
+
+c1_ketiga = (feedback_new_centroid1_3,price_new_centroid1_3)
+c2_ketiga = (feedback_new_centroid2_3,price_new_centroid2_3)
+c3_ketiga = (feedback_new_centroid3_3,price_new_centroid3_3)
+c4_ketiga = (feedback_new_centroid4_3,price_new_centroid4_3)
+
+cent_gbg3=(c1_ketiga,c2_ketiga,c3_ketiga,c4_ketiga)
+cent_gbg3=pd.DataFrame(list(cent_gbg3))
+
+#plot
+plt.scatter(feedback, price)   
+plt.scatter(cent_gbg3[0], cent_gbg3[1], c='red', marker='x')
+
